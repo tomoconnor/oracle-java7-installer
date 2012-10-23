@@ -21,3 +21,6 @@ For Java 7 u7:
 
 5. Install the resulting deb file as you wish.
 
+The biggest reason for doing it this way rather than using http://www.webupd8.org/2012/06/how-to-install-oracle-java-7-in-debian.html is because this way gives  you a fat .deb file containing java, so you can install it in places that might not have connectivity (or have slow connectivity).
+
+Also, Oracle will probably cripple the webupd8 method at some point, probably by putting a captcha in front of the downloads page.  Wouldn't surprise me.  The advantage of doing it this way is you do it once, update the deb build environment.  Build the deb, install it.  Done. 
