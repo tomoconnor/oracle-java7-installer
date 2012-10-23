@@ -15,7 +15,7 @@ For Java 7 u7:
 
 2. Download the jdk-7u7-linux-x64.tar.gz file
 
-3. Drop that file in src/var/cache/oracle-jdk7-installer/jdk-7u7-linux-x64.gz
+3. Drop that file in src/var/cache/oracle-jdk7-installer/jdk-7u7-linux-x64.tar.gz
 
 4. run info/bin/build-deb
 
