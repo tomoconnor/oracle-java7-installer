@@ -1,0 +1,12 @@
+Package: oracle-jdk7-installer
+Source: oracle-java7-installer
+Version: 7u3-0~webupd8~8
+Architecture: all
+Maintainer: Alin Andrei <webupd8@gmail.com>
+Installed-Size: 26
+Depends: oracle-java7-installer
+Section: non-free/java
+Priority: optional
+Homepage: http://www.oracle.com/technetwork/java/javase/downloads/index.html
+Description: Oracle JDK Installer meta package
+ Transitional oracle-jdk7-installer metapackage for oracle-java7-installer

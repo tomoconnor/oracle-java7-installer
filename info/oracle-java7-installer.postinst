@@ -1,0 +1,215 @@
+#!/bin/sh
+#jinstall - Command line script to easily add new java directories to
+#'alternatives'. This sets the java as default, and you can switch your
+#default java with update-java-alternatives
+#
+#Copyright 2012 Bruce.Ingalls at gmail & Alin Andrei <webupd8@gmail.com>
+#GPL v3 Affero license at http://www.gnu.org/
+#Downloads & discussion at http://www.webupd8.org/
+#Tested on Ubuntu Oneiric; should require few changes for other modern Unix systems
+#Currently tested only with JDK, not JRE.
+# Not fully internationalized, including japanese man pages
+
+set -e
+
+VER='0.6alpha'
+
+case $(uname -m) in
+  'i686'    ) arch=i386; dld=i586;;
+  'x86_64'  ) arch=amd64; dld=x64;;
+  *         )
+    echo "Please report to author unsupported platform '`uname -m`'.";
+    echo "Proceeding without web browser plugin support";
+    arch='';
+esac
+
+
+########Variables
+
+JAVA_VERSION=7u7 #must be modified for each release
+FILENAME=jdk-${JAVA_VERSION}-linux-${dld}.tar.gz
+case $(uname -m) in
+  'i686'    ) SHA256SUM_TGZ="798a3ea1d390358bdc01911d9aab7da1ff887157b56becc0e07e6f2c031f9ded";; #must be modified for each release
+  'x86_64'  ) SHA256SUM_TGZ="28ff4bc3194617e0f6144013b1ca391b279804170e297faa6879963424846c2d";; #must be modified for each release
+  *         )
+    echo "Please report to author unsupported platform '`uname -m`'.";
+    echo "Proceeding without web browser plugin support";
+esac
+PARTNER_URL=http://download.oracle.com/otn-pub/java/jdk/7u6-b04/$FILENAME #must be modified for each release!!!
+COOKIE_URL=http://launchpadlibrarian.net/98645053/cookie.txt #required by the latest JDK7, wget doesn't work without it
+J_INSTALL_DIR=/usr/lib/jvm/java-7-oracle
+J_DIRPATH=$(tar tf /var/cache/oracle-jdk7-installer/jdk-${JAVA_VERSION}-linux-x64.tar.gz |head -1) # This will work as long as Oracle still have the main directory as the only thing in the tar.gz file, so we list and grab the first line
+J_DIR=${J_DIRPATH%?} # then we strip the slash off the end.
+
+#J_DIR=jdk1.7.0_06 #must be modified for each release
+
+########Create dirs
+mkdir -p /var/cache/oracle-jdk7-installer
+mkdir -p /usr/lib/jvm
+mkdir -p /usr/lib/oracle-jdk7-installer-unpackdir
+#without this, an error is displayed if the folder doesn't exist:
+mkdir -p /usr/lib/mozilla/plugins/
+
+#############
+
+
+
+. /usr/share/debconf/confmodule
+
+fp_exit_with_error() {
+	echo $1
+	echo "Oracle JDK 7 is NOT installed."
+#	db_fset oracle-java7-installer/local seen false
+#	db_fset oracle-java7-installer/httpget seen false
+#	db_set oracle-java7-installer/httpget false
+	exit 1
+}
+
+fp_download_and_unpack() {
+
+	cd /var/cache/oracle-jdk7-installer
+
+#	db_get oracle-jdk7-installer/local
+	RET="/var/cache/oracle-jdk7-installer"
+	FILENAME="jdk-${JAVA_VERSION}-linux-x64.tar.gz"
+	if [ -d "$RET" -a -f "$RET"/$FILENAME ]; then
+
+		echo "Installing from local file $RET/$FILENAME"
+		cp -f -p "$RET"/$FILENAME ${FILENAME}_TEMP
+		mv -f ${FILENAME}_TEMP $FILENAME
+#	else # no local file
+#
+#		db_get oracle-java7-installer/httpget
+#		if [ "$RET" != "true" ]; then
+#			fp_exit_with_error "download or license refused"
+#		fi
+#
+#		# use apt proxy
+#		APT_PROXIES=$(apt-config shell \
+#		http_proxy Acquire::http::Proxy \
+#		https_proxy Acquire::https::Proxy \
+#		ftp_proxy Acquire::ftp::Proxy \
+#		)
+#
+#		if [ -n "$APT_PROXIES" ]; then
+#			eval export $APT_PROXIES
+#		fi
+#
+#		# setting wget options
+#		:> wgetrc
+#		echo "noclobber = off" >> wgetrc
+#		echo "dir_prefix = ." >> wgetrc
+#		echo "dirstruct = off" >> wgetrc
+#		echo "verbose = on" >> wgetrc
+#		echo "progress = dot:mega" >> wgetrc
+#		echo "tries = 2" >> wgetrc
+#
+#		# downloading jdk7
+#		echo "Downloading cookie..."
+#		rm -f cookie.txt
+#		WGETRC=wgetrc wget $COOKIE_URL \
+#			|| fp_exit_with_error "download failed"
+#		rm -f $FILENAME
+#		echo "Downloading Oracle Java 7..."
+#		WGETRC=wgetrc wget --load-cookies cookie.txt $PARTNER_URL \
+#			|| fp_exit_with_error "download failed"
+#		rm -f wgetrc
+#		echo "Download done."
+#
+	fi # end if local file
+
+	# verify SHA256 checksum of (copied or downloaded) tarball
+	rm -rf jdk*/
+        #echo "$SHA256SUM_TGZ  $FILENAME" | sha256sum -c > /dev/null 2>&1 \
+	#	|| fp_exit_with_error "sha256sum mismatch $FILENAME"
+
+	# unpacking and checking the plugin
+	tar xzf $FILENAME || fp_exit_with_error "cannot unpack jdk7"
+}
+
+OLDDIR=/usr/lib/oracle-jdk7-installer-unpackdir
+NEWDIR=/var/cache/oracle-jdk7-installer
+
+safe_move() {
+	[ ! -f $OLDDIR/$1 ] || [ -f $NEWDIR/$1 ] || mv $OLDDIR/$1 $NEWDIR/$1 2> /dev/null || true
+	[ ! -f $OLDDIR/$1 ] || [ ! -f $NEWDIR/$1 ] || rm -f $OLDDIR/$1 2> /dev/null || true
+}
+
+fp_download_and_unpack
+
+#copy JDK to the right dir
+mv $J_DIR java-7-oracle
+rm -rf /usr/lib/jvm/java-7-oracle
+cp -rf java-7-oracle /usr/lib/jvm/
+
+#install javaws-wrapper.sh
+mv $J_INSTALL_DIR/jre/bin/javaws $J_INSTALL_DIR/jre/bin/javaws.real
+install -m 755 javaws-wrapper.sh $J_INSTALL_DIR/jre/bin/javaws
+
+#install jar.binfmt
+install -m 755 jar.binfmt $J_INSTALL_DIR/jre/lib/jar.binfmt
+
+#clean up
+rm -rf java-7-oracle
+
+#To add when an older version exists:
+#safe_move jdk-7u2-linux-x64.tar.gz #must be modified for each release
+#safe_move jdk-7u2-linux-i586.tar.gz #must be modified for each release
+rmdir $OLDDIR 2> /dev/null || true
+#remove previous versions, if they exist
+
+
+#db_fset oracle-java7-installer/local seen false
+#db_fset oracle-java7-installer/httpget seen false
+#db_set oracle-java7-installer/httpget false
+
+#This step is optional, recommended, and affects code below.
+ls $J_INSTALL_DIR/man/man1/*.1 >/dev/null 2>&1 && \
+  gzip -9 $J_INSTALL_DIR/man/man1/*.1 >/dev/null 2>&1
+
+#Increment highest version by 1.
+#Also assumes all Java helper programs (javaws, jcontrol, etc) at same version as java.
+#These helpers should be slaves, or in the same path as java; thus, a reasonable assumption.
+
+LATEST=1
+LATEST=$((`LANG=C update-alternatives --display java | grep ^/ | sed -e 's/.* //g' | sort -n | tail -1`+1))
+
+#This will issue ignorable warnings for alternatives that are not part of a group
+if [ -d "$J_INSTALL_DIR/man/man1" ];then
+    for f in $J_INSTALL_DIR/man/man1/*; do
+        name=`basename $f .1.gz`;
+        #some files, like jvisualvm might not be links. Further assume this for corresponding man page
+        if [ ! -f "/usr/bin/$name" -o -L "/usr/bin/$name" ]; then
+            if [ ! -f "$J_INSTALL_DIR/man/man1/$name.1.gz" ]; then
+                name=`basename $f .1`;          #handle any legacy uncompressed pages
+            fi
+            update-alternatives --install /usr/bin/$name $name $J_INSTALL_DIR/bin/$name $LATEST --slave /usr/share/man/man1/$name.1.gz $name.1.gz $J_INSTALL_DIR/man/man1/$name.1.gz
+        fi
+    done
+    #File links without man pages
+    [ -f $J_INSTALL_DIR/jre/bin/java_vm ]     && update-alternatives --install /usr/bin/java_vm     java_vm     $J_INSTALL_DIR/jre/bin/java_vm $LATEST
+    [ -f $J_INSTALL_DIR/bin/jcontrol ]    && update-alternatives --install /usr/bin/jcontrol    jcontrol    $J_INSTALL_DIR/bin/jcontrol    $LATEST
+    [ -f $J_INSTALL_DIR/jre/lib/jexec ]    && update-alternatives --install /usr/bin/jexec    jexec    $J_INSTALL_DIR/jre/lib/jexec    $LATEST --slave /usr/share/binfmts/jar jexec-binfmt $J_INSTALL_DIR/jre/lib/jar.binfmt
+
+    # register binfmt; ignore errors, the alternative may already be
+    # registered by another JRE.
+    if which update-binfmts >/dev/null && [ -r /usr/share/binfmts/jar ]; then
+        update-binfmts --package oracle-java7 --import jar || true
+    fi
+
+else  #no man pages available
+    for f in $J_INSTALL_DIR/bin/*; do
+        name=`basename $f`;
+        if [ ! -f "/usr/bin/$name" -o -L "/usr/bin/$name" ]; then  #some files, like jvisualvm might not be links
+            update-alternatives --install /usr/bin/$name $name $J_INSTALL_DIR/bin/$name $LATEST
+        fi
+    done
+fi
+
+echo "Oracle JDK 7 installed"
+
+#Install Firefox (and compatible) plugin. $arch will be empty for unknown platform
+[ -f $J_INSTALL_DIR/jre/lib/$arch/libnpjp2.so ] && update-alternatives --install /usr/lib/mozilla/plugins/libnpjp2.so libnpjp2.so $J_INSTALL_DIR/jre/lib/$arch/libnpjp2.so $LATEST
+
+echo "Oracle JRE 7 browser plugin installed"
+

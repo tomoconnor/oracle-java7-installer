@@ -1,0 +1,12 @@
+9f3bf674bb98340a85ed14174f1543ef  usr/share/applications/JB-controlpanel.desktop
+80cc65ea1916c926cc26363786e2f527  usr/share/applications/JB-java.desktop
+85fb3143c7148074859b17ab278fe449  usr/share/applications/JB-javaws.desktop
+42ffa621fd0fbdb8fbfb06f4090c8466  usr/share/applications/JB-jconsole.desktop
+64b15673563aa444c49f07f8327ea353  usr/share/applications/JB-jvisualvm.desktop
+158379a6f3aa8f43b89ce3a8aa45aace  usr/share/applications/JB-policytool.desktop
+11b9fa5fee2b9657af6d9e71680b18e7  usr/share/doc/oracle-java7-installer/changelog.Debian.gz
+e9a27da7011f5871dafe1206c4ee5fb9  usr/share/doc/oracle-java7-installer/copyright
+84719163d1116ce96ead9db455f007ba  usr/share/pixmaps/oracle_java7.png
+b5fc0cafdf7025036ebae6dc53791f6b  usr/share/pixmaps/oracle_java7.xpm
+eabebe1fb21fd171a80cce92d401a7af  var/cache/oracle-jdk7-installer/jar.binfmt
+875425a764757367f4e3fe3e14d123d3  var/cache/oracle-jdk7-installer/javaws-wrapper.sh
