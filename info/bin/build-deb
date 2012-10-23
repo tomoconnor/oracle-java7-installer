@@ -60,7 +60,7 @@ if [ -f info/$PACKAGE_NAME.postinst ]; then
 	   --post-install info/$PACKAGE_NAME.postinst \
 	   --url "$PACKAGE_URL" \
 	   --description "$PACKAGE_DESC" \
-	   --iteration "tomoconnor-$PACKAGE_TARGET_PLATFORM-r$PACKAGE_BUILD_VERSION" \
+	   --iteration "custom-$PACKAGE_TARGET_PLATFORM-r$PACKAGE_BUILD_VERSION" \
 	   --replaces "$PACKAGE_NAME (<< $PACKAGE_VERS)" ${SRC_DIRS}
 
 elif [ -f info/$PACKAGE_NAME.postrm ]; then
@@ -74,7 +74,7 @@ elif [ -f info/$PACKAGE_NAME.postrm ]; then
 	   --post-uninstall info/$PACKAGE_NAME.postrm \
 	   --url "$PACKAGE_URL" \
 	   --description "$PACKAGE_DESC" \
-	   --iteration "tomoconnor-$PACKAGE_TARGET_PLATFORM-r$PACKAGE_BUILD_VERSION" \
+	   --iteration "custom-$PACKAGE_TARGET_PLATFORM-r$PACKAGE_BUILD_VERSION" \
 	   --replaces "$PACKAGE_NAME (<< $PACKAGE_VERS)" ${SRC_DIRS}
 
 elif [ -f info/$PACKAGE_NAME.postrm ]; then
@@ -89,7 +89,7 @@ elif [ -f info/$PACKAGE_NAME.postrm ]; then
 		   --post-install info/$PACKAGE_NAME.postinst \
 		   --url "$PACKAGE_URL" \
 		   --description "$PACKAGE_DESC" \
-		   --iteration "tomoconnor-$PACKAGE_TARGET_PLATFORM-r$PACKAGE_BUILD_VERSION" \
+		   --iteration "custom-$PACKAGE_TARGET_PLATFORM-r$PACKAGE_BUILD_VERSION" \
 		   --replaces "$PACKAGE_NAME (<< $PACKAGE_VERS)" ${SRC_DIRS}
 	fi
 
@@ -102,7 +102,7 @@ else
 	   -t deb \
 	   --url "$PACKAGE_URL" \
 	   --description "$PACKAGE_DESC" \
-	   --iteration "tomoconnor-$PACKAGE_TARGET_PLATFORM-r$PACKAGE_BUILD_VERSION" \
+	   --iteration "custom-$PACKAGE_TARGET_PLATFORM-r$PACKAGE_BUILD_VERSION" \
 	   --replaces "$PACKAGE_NAME (<< $PACKAGE_VERS)" ${SRC_DIRS}
 fi
 
